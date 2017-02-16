@@ -234,12 +234,8 @@ logheader $mainlog > /dev/null
 forkdmesg &
 forkps &
 testcmd|sudo tee -a $mainlog
-# echo "seconds = $SECONDS"
 duration=$SECONDS
-# echo "duration = $duration"
 duration=$(date -u -d @${SECONDS} +%T)
-# echo "duration = $duration"
-# echo "immediately after testcmd - duration = $duration"
 setlogitems
 chkrm $dmesgtmp
 chkrm $pstmp
