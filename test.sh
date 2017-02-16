@@ -12,9 +12,7 @@ sortname="$testname/$packageversion"
 mainlog=mainlog.log
 
 setlogitems(){
- echo "within setlogitems - duration = $duration"
  if [ -n "$note" ] ;then
-	echo "note found, setting note to end"
   testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM,$note"
  else
   testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM"
@@ -110,7 +108,6 @@ process_logs(){
   if [ $note = "" ] ; then
    readnote
   else
-   echo "within process_logs - duration = $duration"
    setlogitems
   fi
  fi
@@ -205,7 +202,6 @@ readnote(){
  then
      read -p "Note: " note
  echo
-   echo "within readnote - duration = $duration"
      setlogitems
  fi
 }
