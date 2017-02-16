@@ -5,20 +5,30 @@ CPUs=$(lscpu|grep ^"CPU(s)"|awk '{print $2}')
 MEM=$(free -h|grep "Mem:"|awk '{print $2}')
 dmesgtmp=/tmp/dmesg.tmp
 pstmp=/tmp/ps.tmp
-testname="newtest"
+testname="pingtest"
 packagename=stress-ng
 packageversion=$(apt-cache policy $packagename|grep Installed|awk '{print $2}')
 sortname="$testname/$packageversion"
 mainlog=mainlog.log
-testlogitems="$d,$testname,$packageversion,$CPUs,$MEM"
+
+setlogitems(){
+ echo "within setlogitems - duration = $duration"
+ if [ -n "$note" ] ;then
+	echo "note found, setting note to end"
+  testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM,$note"
+ else
+  testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM"
+ fi
+}
 
 testcmd(){
  echo "Running test..."
-ping -c5 192.168.1.123
-#/usr/lib/plainbox-provider-checkbox/bin/memory_stress_ng
-#sudo /usr/lib/plainbox-provider-checkbox/bin/memory_test
-#sudo /usr/lib/plainbox-provider-checkbox/bin/disk_stress_ng /dev/sda --base-time 240 --really-run
-#sudo /home/ubuntu/disk_stress_ng.bin /dev/sda --base-time 240 --really-run
+ SECONDS=0
+ ping -c3 192.168.1.123
+# /usr/lib/plainbox-provider-checkbox/bin/memory_stress_ng
+# sudo /usr/lib/plainbox-provider-checkbox/bin/memory_test
+# sudo /usr/lib/plainbox-provider-checkbox/bin/disk_stress_ng /dev/sda --base-time 240 --really-run
+# sudo /home/ubuntu/disk_stress_ng.bin /dev/sda --base-time 240 --really-run
  echo "Test Complete"
 }
 
@@ -100,7 +110,8 @@ process_logs(){
   if [ $note = "" ] ; then
    readnote
   else
-   testlogitems="$testlogitems,$note"
+   echo "within process_logs - duration = $duration"
+   setlogitems
   fi
  fi
  process_mainlog $1
@@ -194,7 +205,8 @@ readnote(){
  then
      read -p "Note: " note
  echo
-     testlogitems="$testlogitems,$note"
+   echo "within readnote - duration = $duration"
+     setlogitems
  fi
 }
 
@@ -222,6 +234,13 @@ logheader $mainlog > /dev/null
 forkdmesg &
 forkps &
 testcmd|sudo tee -a $mainlog
+# echo "seconds = $SECONDS"
+duration=$SECONDS
+# echo "duration = $duration"
+duration=$(date -u -d @${SECONDS} +%T)
+# echo "duration = $duration"
+# echo "immediately after testcmd - duration = $duration"
+setlogitems
 chkrm $dmesgtmp
 chkrm $pstmp
 sleep 6
