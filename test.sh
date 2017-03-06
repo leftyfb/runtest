@@ -107,7 +107,7 @@ process_logs(){
  if [ $1 = "FAIL" ] ; then
   note=$(grep ^"Note: " $mainlog|sed 's/Note: //g')
   d=$(grep ^"Date: " $mainlog|sed 's/Date: //g')
-  kernel=$(grep "kernel = " $mainlog|awk '{print $3}')
+  kernel=$(grep "Kernel: " $mainlog|awk '{print $2}'|head -n1)
   if [ $note = "" ] ; then
    readnote
   else
@@ -130,8 +130,8 @@ logheader(){
 process_mainlog(){
  echo -e "\n================================================================\n
  Test Name: $testname
- Hostname = $HOSTNAME
- Kernel = $kernel
+ Hostname: $HOSTNAME
+ Kernel: $kernel
  Package Name: $packagename
  Package Version: $packageversion
  CPU Cores: $CPUs
@@ -216,7 +216,7 @@ fi
 echo -e "\e[1;93m===========================================================\n"
 echo -e "\e[93mTest Name: \t\t\e[94m$testname"
 echo -e "\e[93mHostname: \t\t\e[94m$HOSTNAME"
-echo -e "\e[93mKernel: \t\t\e[94m$(uname -r)"
+echo -e "\e[93mKernel: \t\t\e[94m$kernel"
 echo -e "\e[93mPackage: \t\t\e[94m$packagename"
 echo -e "\e[93mPackage Version: \t\e[94m$packageversion"
 echo -e "\e[93mCPU Cores: \t\t\e[94m$CPUs"
