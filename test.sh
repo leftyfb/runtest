@@ -10,19 +10,22 @@ packagename=stress-ng
 packageversion=$(apt-cache policy $packagename|grep Installed|awk '{print $2}')
 sortname="$testname/$packageversion"
 mainlog=mainlog.log
+testlogitems="$d,$testname,$duration,$kernel,$packageversion,$CPUs,$MEM"
 
 setlogitems(){
+eval $testlogitems
+duration=$(date -u -d @${SECONDS} +%T)
  if [ -n "$note" ] ;then
-  testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM,$note"
+	testlogitems="$d,$testname,$duration,$kernel,$packageversion,$CPUs,$MEM,$note"
  else
-  testlogitems="$d,$testname,$duration,$packageversion,$CPUs,$MEM"
+	testlogitems="$testlogitems"
  fi
 }
 
 testcmd(){
  echo "Running test..."
  SECONDS=0
- ping -c3 192.168.1.123
+ ping -c10 8.8.8.8
 # /usr/lib/plainbox-provider-checkbox/bin/memory_stress_ng
 # sudo /usr/lib/plainbox-provider-checkbox/bin/memory_test
 # sudo /usr/lib/plainbox-provider-checkbox/bin/disk_stress_ng /dev/sda --base-time 240 --really-run
@@ -186,10 +189,10 @@ forkdmesg(){
  while grep -q "1" $dmesgtmp 2>/dev/null
 	 do 
 		 logheader dmesg1.log > /dev/null
-		 dmesg >/dev/null|sudo tee -a dmesg1.log
+		 dmesg |sudo tee -a dmesg1.log >/dev/null
 		 sleep 5 
 		 logheader dmesg2.log > /dev/null
-		 dmesg >/dev/null|sudo tee -a dmesg2.log
+		 dmesg |sudo tee -a dmesg2.log >/dev/null
 		 sleep 5
  done
 
@@ -230,8 +233,6 @@ logheader $mainlog > /dev/null
 forkdmesg &
 forkps &
 testcmd|sudo tee -a $mainlog
-duration=$SECONDS
-duration=$(date -u -d @${SECONDS} +%T)
 setlogitems
 chkrm $dmesgtmp
 chkrm $pstmp
