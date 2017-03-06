@@ -10,15 +10,12 @@ packagename=stress-ng
 packageversion=$(apt-cache policy $packagename|grep Installed|awk '{print $2}')
 sortname="$testname/$packageversion"
 mainlog=mainlog.log
-testlogitems="$d,$testname,$duration,$kernel,$packageversion,$CPUs,$MEM"
 
 setlogitems(){
-eval $testlogitems
-duration=$(date -u -d @${SECONDS} +%T)
  if [ -n "$note" ] ;then
 	testlogitems="$d,$testname,$duration,$kernel,$packageversion,$CPUs,$MEM,$note"
  else
-	testlogitems="$testlogitems"
+	testlogitems="$d,$testname,$duration,$kernel,$packageversion,$CPUs,$MEM"
  fi
 }
 
@@ -233,6 +230,8 @@ logheader $mainlog > /dev/null
 forkdmesg &
 forkps &
 testcmd|sudo tee -a $mainlog
+duration=$SECONDS
+duration=$(date -u -d @${SECONDS} +%T)
 setlogitems
 chkrm $dmesgtmp
 chkrm $pstmp
